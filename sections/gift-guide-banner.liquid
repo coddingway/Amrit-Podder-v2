@@ -1,0 +1,179 @@
+{%- comment -%}
+  Gift Guide — Banner (custom section, built from scratch)
+  ------------------------------------------------------------------
+  Top bar (logo, tagline, CHOOSE GIFT), hero (illustration, heading,
+  copy, SHOP NOW) and the bottom strip. Every text from the Figma
+  "red rectangles" is a setting, so it can be edited in the customizer.
+
+  Mobile (< 750px): the top bar collapses into a hamburger menu built
+  on native <details>/<summary> — no JavaScript needed.
+{%- endcomment -%}
+{{ 'gg-button.css' | asset_url | stylesheet_tag }}
+{{ 'gg-banner.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign s = section.settings
+  assign mobile_description = s.description_mobile | default: s.description
+  assign mobile_strip = s.strip_text_mobile | default: s.strip_text
+-%}
+
+<section class="gg-banner" id="GiftGuideBanner-{{ section.id }}" aria-labelledby="GiftGuideBannerHeading-{{ section.id }}">
+  {%- comment -%} Top bar {%- endcomment -%}
+  <header class="gg-banner__bar">
+    <details class="gg-banner__menu">
+      <summary class="gg-banner__menu-toggle" aria-label="Menu">
+        {%- render 'gg-icon', icon: 'menu', class: 'gg-banner__menu-open' -%}
+        {%- render 'gg-icon', icon: 'menu-close', class: 'gg-banner__menu-close' -%}
+      </summary>
+      <div class="gg-banner__menu-panel">
+        {%- if s.tagline != blank -%}
+          <p class="gg-banner__tagline">{{ s.tagline | escape }}</p>
+        {%- endif -%}
+        {%- if s.choose_label != blank -%}
+          {%- render 'gg-button', label: s.choose_label, url: s.choose_url, style: 'light', class: 'gg-banner__choose' -%}
+        {%- endif -%}
+      </div>
+    </details>
+
+    <a class="gg-banner__logo" href="{{ routes.root_url }}">{{ s.logo_text | escape }}</a>
+
+    {%- comment -%} Desktop-only copies of the menu content (hidden on mobile). {%- endcomment -%}
+    {%- if s.tagline != blank -%}
+      <p class="gg-banner__tagline gg-banner__desktop">{{ s.tagline | escape }}</p>
+    {%- endif -%}
+    {%- if s.choose_label != blank -%}
+      {%- render 'gg-button', label: s.choose_label, url: s.choose_url, style: 'light', class: 'gg-banner__choose gg-banner__desktop' -%}
+    {%- endif -%}
+  </header>
+
+  {%- comment -%} Hero {%- endcomment -%}
+  <div class="gg-banner__hero">
+    <div class="gg-banner__hero-inner">
+      <div class="gg-banner__art" aria-hidden="true">
+        <img class="gg-banner__art-top" src="{{ 'gg-hero-top.svg' | asset_url }}" alt="" width="1440" height="390" fetchpriority="high">
+        <img class="gg-banner__art-bottom" src="{{ 'gg-hero-bottom.svg' | asset_url }}" alt="" width="890" height="402">
+        <img class="gg-banner__art-mobile" src="{{ 'gg-hero-mobile.svg' | asset_url }}" alt="" width="686" height="264" loading="lazy">
+      </div>
+
+      <div class="gg-banner__content">
+        <h1 class="gg-banner__heading" id="GiftGuideBannerHeading-{{ section.id }}">{{ s.heading | escape }}</h1>
+        {%- if s.description != blank -%}
+          <p class="gg-banner__text gg-banner__desktop">{{ s.description | escape | newline_to_br }}</p>
+        {%- endif -%}
+        {%- if mobile_description != blank -%}
+          <p class="gg-banner__text gg-banner__mobile">{{ mobile_description | escape | newline_to_br }}</p>
+        {%- endif -%}
+        {%- if s.shop_label != blank -%}
+          {%- render 'gg-button', label: s.shop_label, url: s.shop_url, style: 'dark', class: 'gg-banner__shop' -%}
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+
+  {%- comment -%} Bottom strip {%- endcomment -%}
+  {%- if s.strip_text != blank or mobile_strip != blank -%}
+    <div class="gg-banner__strip">
+      <p class="gg-banner__desktop">{{ s.strip_text | escape }}</p>
+      <p class="gg-banner__mobile">{{ mobile_strip | escape }}</p>
+    </div>
+  {%- endif -%}
+</section>
+
+{% schema %}
+{
+  "name": "Gift Guide banner",
+  "tag": "div",
+  "class": "gg-banner-section",
+  "limit": 1,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Top bar"
+    },
+    {
+      "type": "text",
+      "id": "logo_text",
+      "label": "Logo text",
+      "default": "TISSO VISON"
+    },
+    {
+      "type": "text",
+      "id": "tagline",
+      "label": "Tagline",
+      "default": "Find the ideal gift for your loved ones."
+    },
+    {
+      "type": "text",
+      "id": "choose_label",
+      "label": "Top button label",
+      "default": "Choose gift"
+    },
+    {
+      "type": "url",
+      "id": "choose_url",
+      "label": "Top button link",
+      "default": "/collections/all"
+    },
+    {
+      "type": "header",
+      "content": "Hero"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "The Gift Guide"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "Discover Joy: Your Ultimate Holiday Gift Destination. Explore our curated selection and find the perfect gifts to delight your loved ones this holiday season."
+    },
+    {
+      "type": "textarea",
+      "id": "description_mobile",
+      "label": "Description (mobile)",
+      "info": "Shorter copy shown on mobile. Leave empty to reuse the description.",
+      "default": "Discover Joy: Your Ultimate Holiday Gift Destination."
+    },
+    {
+      "type": "text",
+      "id": "shop_label",
+      "label": "Hero button label",
+      "default": "Shop now"
+    },
+    {
+      "type": "url",
+      "id": "shop_url",
+      "label": "Hero button link",
+      "default": "/collections/all"
+    },
+    {
+      "type": "header",
+      "content": "Bottom strip"
+    },
+    {
+      "type": "text",
+      "id": "strip_text",
+      "label": "Strip text",
+      "default": "SUSTAINABLE, ETHICALLY MADE CLOTHES IN SIZES XXS TO 6XL"
+    },
+    {
+      "type": "text",
+      "id": "strip_text_mobile",
+      "label": "Strip text (mobile)",
+      "info": "Leave empty to reuse the strip text.",
+      "default": "SUSTAINABLE, ETHICALLY MADE ACTIVEWEAR"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Gift Guide banner"
+    }
+  ],
+  "enabled_on": {
+    "templates": ["page"]
+  }
+}
+{% endschema %}

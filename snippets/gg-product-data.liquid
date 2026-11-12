@@ -1,0 +1,48 @@
+{%- doc -%}
+  Outputs a compact JSON description of a product for the Gift Guide popup.
+  Only the fields the popup needs are included (much lighter than `product | json`).
+  Prices are pre-formatted with the shop's money format (e.g. "980,00€").
+
+  @param {product} product - Product to serialise
+
+  @example
+  <script type="application/json">{% render 'gg-product-data', product: product %}</script>
+{%- enddoc -%}
+{%- liquid
+  assign image = product.featured_image
+  assign first_variant = product.selected_or_first_available_variant
+-%}
+{
+  "title": {{ product.title | json }},
+  "price": {{ first_variant.price | money | json }},
+  "description": {{ product.description | strip_html | strip | truncatewords: 20 | json }},
+  "image": {% if image %}{{ image | image_url: width: 300 | json }}{% else %}null{% endif %},
+  "imageAlt": {{ image.alt | default: product.title | json }},
+  "options": [
+    {%- for option in product.options_with_values -%}
+      {
+        "name": {{ option.name | json }},
+        "values": {{ option.values | json }},
+        {%- comment -%} Native Shopify swatch colour per value (null when none is set). {%- endcomment -%}
+        "swatches": [
+          {%- for value in option.values -%}
+            {%- if value.swatch.color -%}{{ value.swatch.color | color_to_hex | json }}{%- else -%}null{%- endif -%}
+            {%- unless forloop.last %},{% endunless -%}
+          {%- endfor -%}
+        ]
+      }
+      {%- unless forloop.last %},{% endunless -%}
+    {%- endfor -%}
+  ],
+  "variants": [
+    {%- for variant in product.variants -%}
+      {
+        "id": {{ variant.id }},
+        "available": {{ variant.available | json }},
+        "price": {{ variant.price | money | json }},
+        "options": {{ variant.options | json }}
+      }
+      {%- unless forloop.last %},{% endunless -%}
+    {%- endfor -%}
+  ]
+}

@@ -1,0 +1,74 @@
+{%- comment -%}
+  Gift Guide layout
+  ------------------------------------------------------------------
+  Lean, standalone layout used only by templates/page.gift-guide.json.
+  It intentionally loads none of Dawn's header/footer groups, base.css
+  or global.js: the page is built entirely from the two custom
+  "Gift Guide" sections and their own scoped assets.
+{%- endcomment -%}
+<!doctype html>
+<html lang="{{ request.locale.iso_code }}">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="canonical" href="{{ canonical_url }}">
+
+    <title>
+      {{ page_title }}
+      {%- unless page_title contains shop.name %} &ndash; {{ shop.name }}{% endunless -%}
+    </title>
+    {%- if page_description -%}
+      <meta name="description" content="{{ page_description | escape }}">
+    {%- endif -%}
+
+    {%- comment -%} Self-hosted fonts from the Figma file: Jost (300–500, variable) and Lustria (400). {%- endcomment -%}
+    {{ 'gg-jost.woff2' | asset_url | preload_tag: as: 'font', type: 'font/woff2', crossorigin: 'anonymous' }}
+    {{ 'gg-lustria.woff2' | asset_url | preload_tag: as: 'font', type: 'font/woff2', crossorigin: 'anonymous' }}
+    <style>
+      @font-face {
+        font-family: 'Jost';
+        src: url('{{ 'gg-jost.woff2' | asset_url }}') format('woff2');
+        font-weight: 300 500;
+        font-style: normal;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: 'Lustria';
+        src: url('{{ 'gg-lustria.woff2' | asset_url }}') format('woff2');
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      /* Minimal page reset — everything else lives in the section stylesheets. */
+      *, *::before, *::after { box-sizing: border-box; }
+      html { -webkit-text-size-adjust: 100%; }
+      body {
+        margin: 0;
+        background: #fff;
+        color: #000;
+        font-family: 'Jost', sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      img, svg { display: block; max-width: 100%; }
+      .gg-visually-hidden {
+        position: absolute !important;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+      }
+    </style>
+
+    {{ content_for_header }}
+  </head>
+
+  <body>
+    <main id="MainContent" role="main" tabindex="-1">
+      {{ content_for_layout }}
+    </main>
+  </body>
+</html>

@@ -1,0 +1,38 @@
+{%- doc -%}
+  Renders one of the Gift Guide icons as inline SVG (paths exported from Figma).
+  Icons use `currentColor`, so they follow the text color of their parent.
+
+  @param {string} icon - Icon name: arrow | plus | close | chevron | menu | menu-close
+  @param {string} [class] - Extra class for the <svg>
+
+  @example
+  {% render 'gg-icon', icon: 'arrow' %}
+{%- enddoc -%}
+{%- case icon -%}
+  {%- when 'arrow' -%}
+    <svg class="gg-icon gg-icon--arrow {{ class }}" width="27" height="11" viewBox="0 0 27.0072 11.0459" fill="none" aria-hidden="true" focusable="false">
+      <path d="M0.75 4.77297H0V6.27297H0.75V5.52297V4.77297ZM0.75 5.52297V6.27297H26.2572V5.52297V4.77297H0.75V5.52297ZM26.7876 6.0533C27.0805 5.76041 27.0805 5.28553 26.7876 4.99264L22.0146 0.21967C21.7217 -0.0732231 21.2468 -0.0732231 20.9539 0.21967C20.6611 0.512564 20.6611 0.987437 20.9539 1.28033L25.1966 5.52297L20.9539 9.76561C20.6611 10.0585 20.6611 10.5334 20.9539 10.8263C21.2468 11.1192 21.7217 11.1192 22.0146 10.8263L26.7876 6.0533Z" fill="currentColor"/>
+    </svg>
+  {%- when 'plus' -%}
+    <svg class="gg-icon gg-icon--plus {{ class }}" width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true" focusable="false">
+      <circle cx="11" cy="11" r="11" fill="#F8F8F8" fill-opacity="0.9"/>
+      <path d="M11.3457 7.04175V15.5033M7.11523 11.2725H15.5768" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" stroke-linejoin="round"/>
+    </svg>
+  {%- when 'close' -%}
+    {%- comment -%} Figma draws the close button as a plus rotated -45°. {%- endcomment -%}
+    <svg class="gg-icon gg-icon--close {{ class }}" width="14" height="14" viewBox="0 0 13.5 13.5" fill="none" aria-hidden="true" focusable="false">
+      <path d="M6.74977 0.75V12.75M0.75 6.74977H12.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" stroke-linejoin="round" transform="rotate(-45 6.75 6.75)"/>
+    </svg>
+  {%- when 'chevron' -%}
+    <svg class="gg-icon gg-icon--chevron {{ class }}" width="14" height="8" viewBox="0 0 14.1213 8.12132" fill="none" aria-hidden="true" focusable="false">
+      <path d="M1.06066 1.06066L7.06066 7.06066L13.0607 1.06066" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/>
+    </svg>
+  {%- when 'menu' -%}
+    <svg class="gg-icon gg-icon--menu {{ class }}" width="20" height="12" viewBox="0 0 20 12" fill="none" aria-hidden="true" focusable="false">
+      <path d="M1 1H19M1 6H19M1 11H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  {%- when 'menu-close' -%}
+    <svg class="gg-icon gg-icon--menu-close {{ class }}" width="15" height="15" viewBox="0 0 14.7279 14.9994" fill="none" aria-hidden="true" focusable="false">
+      <path d="M1 13.9994L13.7279 1.27148M1 1L13.7279 13.7279" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+{%- endcase -%}

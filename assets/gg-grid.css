@@ -1,0 +1,450 @@
+/* ==========================================================================
+   Gift Guide — Grid section + quick-view popup (sections/gift-guide-grid.liquid)
+   Desktop values follow the 1440px Figma frame; mobile follows the 375px frame.
+   ========================================================================== */
+.gg-grid {
+  display: block;
+  padding: 90px 0 51px;
+}
+
+.gg-grid__inner {
+  max-width: 1339px;
+  margin: 0 auto;
+  padding: 0 24px;
+  box-sizing: content-box;
+}
+
+.gg-grid__title {
+  margin: 0 0 30px;
+  font-family: 'Lustria', serif;
+  font-size: 36px;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.gg-grid__list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.gg-grid__item {
+  position: relative;
+  aspect-ratio: 433 / 444;
+  overflow: hidden;
+  background: #f5f5f5;
+}
+
+.gg-grid__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* "+" hotspot — position comes from the block settings (CSS custom props). */
+.gg-grid__hotspot {
+  position: absolute;
+  top: var(--gg-hotspot-y, 50%);
+  left: var(--gg-hotspot-x, 60%);
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: #000;
+  cursor: pointer;
+  transition: transform 0.25s ease;
+}
+.gg-grid__hotspot svg {
+  width: 100%;
+  height: 100%;
+}
+.gg-grid__hotspot:hover {
+  transform: scale(1.15);
+}
+.gg-grid__hotspot:focus-visible {
+  outline: 2px solid #000;
+  outline-offset: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   Popup (native <dialog>) — 319×455 card in Figma
+   -------------------------------------------------------------------------- */
+/* Figma: 311×447 card (frames 0:538 desktop / 0:524 mobile). */
+.gg-popup {
+  width: 311px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100dvh - 32px);
+  padding: 0;
+  border: 0;
+  background: #fff;
+  color: #000;
+  font-family: 'Jost', sans-serif;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.2));
+  overflow: visible;
+}
+
+.gg-popup::backdrop {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.gg-popup[open] {
+  animation: gg-popup-in 0.25s ease-out;
+}
+
+@keyframes gg-popup-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+.gg-popup__close {
+  position: absolute;
+  top: 15px;
+  right: 14px;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #000;
+  cursor: pointer;
+}
+
+/* The dialog auto-focuses the close button; only show a ring for keyboard users. */
+.gg-popup__close:focus:not(:focus-visible) {
+  outline: none;
+}
+.gg-popup__close:focus-visible {
+  outline: 2px solid #000;
+  outline-offset: 2px;
+}
+
+.gg-popup__form {
+  display: flex;
+  flex-direction: column;
+  min-height: 447px;
+  padding: 36px 20px 25px;
+}
+
+/* Fixed to the image height so the options always start at y186, as in Figma. */
+.gg-popup__summary {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  column-gap: 5px; /* text column at x145 */
+  align-items: start;
+  height: 140px;
+}
+
+.gg-popup__image {
+  width: 120px;
+  height: 140px;
+  margin-left: -3px; /* image sits at x17, controls at x20 */
+  object-fit: cover;
+}
+
+/* Products without an image: keep the text column aligned. */
+.gg-popup__image[hidden] {
+  display: none;
+}
+.gg-popup__image[hidden] + .gg-popup__info {
+  grid-column: 1 / -1;
+}
+
+.gg-popup__info {
+  padding-top: 13px;
+}
+
+.gg-popup__title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 300;
+  line-height: 1.2;
+}
+
+.gg-popup__price {
+  margin: 20px 0 0;
+  font-family: 'Lustria', serif;
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.gg-popup__description {
+  margin: 12px 0 0;
+  font-size: 14px;
+  font-weight: 300;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  /* Real descriptions are longer than the design copy: keep the Figma 4-line block. */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  overflow: hidden;
+}
+
+.gg-popup__options {
+  display: flex;
+  flex-direction: column;
+  gap: 11.5px;
+  margin-top: 10px;
+}
+
+.gg-popup__message {
+  min-height: 1.3em;
+  margin: 12px 0 8px;
+  font-size: 14px;
+  line-height: 1.3;
+}
+.gg-popup__message.is-error {
+  color: #b00020;
+}
+.gg-popup__message a {
+  color: inherit;
+}
+
+.gg-popup__submit {
+  --gg-btn-pad-left: 78px;
+  --gg-btn-pad-right: 39px;
+  width: 100%;
+  min-height: 45px;
+  margin-top: auto;
+}
+
+/* Option label ("Color", "Size") */
+.gg-option__label {
+  margin: 0 0 6px;
+  color: #333;
+  font-size: 14px;
+  line-height: 1.3;
+}
+
+/* Colour buttons: one column per value, swatch bar on the left of each value. */
+.gg-colors {
+  --gg-swatch-width: 5.8px;
+  /* Figma prototype: Smart Animate, 300ms, ease-out. */
+  --gg-switch-motion: 0.3s cubic-bezier(0, 0, 0.58, 1);
+
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: repeat(var(--gg-count, 2), 1fr);
+  border: 0.5px solid #000;
+  background: #fff;
+}
+
+/* Black "selected" fill: covers the whole active button and slides between values. */
+.gg-colors__indicator {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--gg-selected, 0) * 100% / var(--gg-count, 2));
+  width: calc(100% / var(--gg-count, 2));
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  transition: left var(--gg-switch-motion), opacity var(--gg-switch-motion);
+}
+/* First pick: nothing to slide from, so the fill only fades in (Figma dissolve). */
+.gg-colors:not(.has-selection) .gg-colors__indicator {
+  transition: none;
+}
+.gg-colors.has-selection .gg-colors__indicator {
+  opacity: 1;
+}
+
+.gg-colors__option {
+  position: relative;
+  z-index: 1;
+  min-height: 40px;
+  padding: 0 8px 0 15px;
+  border: 0;
+  background: transparent;
+  color: #000;
+  font: 400 18px/1 'Jost', sans-serif;
+  letter-spacing: -0.02em;
+  text-align: left;
+  text-transform: capitalize;
+  cursor: pointer;
+  transition: color var(--gg-switch-motion);
+}
+.gg-colors__option::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  /* Figma: 5.8px swatch bar with its own 0.5px outline, coloured per value. */
+  width: var(--gg-swatch-width);
+  border: 0.5px solid #000;
+  background: var(--gg-swatch);
+  transition: background-color var(--gg-switch-motion);
+}
+/* Active value: label turns white and its swatch bar fills with the button. */
+.gg-colors__option[aria-checked='true'] {
+  color: #fff;
+}
+.gg-colors__option[aria-checked='true']::before {
+  background: #000;
+}
+.gg-colors__option:focus-visible {
+  outline: 2px solid #000;
+  outline-offset: 2px;
+  z-index: 1;
+}
+
+/* Custom dropdown (size). */
+.gg-select {
+  position: relative;
+}
+
+.gg-select__toggle {
+  display: grid;
+  grid-template-columns: 1fr 55px;
+  align-items: stretch;
+  width: 100%;
+  min-height: 40px;
+  padding: 0;
+  border: 0.5px solid #000;
+  background: #fff;
+  color: #000;
+  font: 400 16px/1 'Jost', sans-serif;
+  letter-spacing: -0.02em;
+  text-align: left;
+  cursor: pointer;
+}
+
+.gg-select__value {
+  align-self: center;
+  padding-left: 13px;
+}
+
+.gg-select__icon {
+  display: grid;
+  place-items: center;
+  border-left: 0.5px solid #000;
+}
+.gg-select__icon svg {
+  transition: transform 0.3s cubic-bezier(0, 0, 0.58, 1);
+}
+.gg-select.is-open .gg-select__icon svg {
+  transform: rotate(180deg);
+}
+
+.gg-select__list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  display: none;
+  max-height: 200px;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  border: 0.5px solid #000;
+  border-top: 0;
+  background: #fff;
+  list-style: none;
+}
+.gg-select.is-open .gg-select__list {
+  display: block;
+  animation: gg-list-in 0.3s cubic-bezier(0, 0, 0.58, 1);
+}
+
+@keyframes gg-list-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+.gg-select__option {
+  padding: 10px;
+  font-size: 16px;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  text-align: center;
+  cursor: pointer;
+  /* Figma prototype: hover state via Smart Animate, 300ms ease-out. */
+  transition: background-color 0.3s cubic-bezier(0, 0, 0.58, 1), color 0.3s cubic-bezier(0, 0, 0.58, 1);
+}
+.gg-select__option:hover,
+.gg-select__option:focus,
+.gg-select__option[aria-selected='true'] {
+  outline: none;
+  background: #000;
+  color: #fff;
+}
+
+/* --------------------------------------------------------------------------
+   Mobile (< 750px) — 375px Figma frame: 2 columns, 4px gap
+   -------------------------------------------------------------------------- */
+@media screen and (max-width: 749px) {
+  .gg-grid {
+    padding: 40px 0 32px;
+  }
+
+  .gg-grid__inner {
+    padding: 0 16px;
+  }
+
+  .gg-grid__title {
+    margin-bottom: 20px;
+    font-size: 24px;
+    text-align: center;
+  }
+
+  .gg-grid__list {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px;
+  }
+
+  .gg-grid__item {
+    aspect-ratio: 169 / 186.42;
+  }
+
+  /* Mobile popup (Figma 0:524): 12px description, slightly lower copy. */
+  .gg-popup__price {
+    margin-top: 22px;
+  }
+  .gg-popup__description {
+    margin-top: 13px;
+    font-size: 12px;
+  }
+
+  /* Figma places every mobile hotspot at the same spot. */
+  .gg-grid__hotspot {
+    top: 9.7%;
+    left: 59.9%;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gg-popup[open] {
+    animation: none;
+  }
+  .gg-grid__hotspot,
+  .gg-select__icon svg,
+  .gg-colors__indicator,
+  .gg-colors__option,
+  .gg-colors__option::before,
+  .gg-select__option {
+    transition: none;
+  }
+  .gg-select.is-open .gg-select__list {
+    animation: none;
+  }
+}

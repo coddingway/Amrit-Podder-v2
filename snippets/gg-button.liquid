@@ -1,0 +1,34 @@
+{%- doc -%}
+  Animated Gift Guide button (label + arrow).
+  On hover a fill sweeps in from the left: the "dark" button fills with yellow,
+  the "light" (yellow) button drains to black — matching the Figma hover states.
+  Renders an <a> when `url` is given, otherwise a <button>.
+
+  @param {string} label - Button text (rendered uppercase via CSS)
+  @param {string} [url] - Link target; omit to render a <button>
+  @param {string} [style] - 'dark' (default) or 'light'
+  @param {string} [class] - Extra classes
+  @param {string} [type] - <button> type, defaults to 'button'
+  @param {string} [attributes] - Extra raw attributes (e.g. data-*)
+
+  @example
+  {% render 'gg-button', label: 'Shop now', url: '/collections/all', style: 'dark' %}
+{%- enddoc -%}
+{%- liquid
+  assign btn_style = style | default: 'dark'
+  assign classes = 'gg-btn gg-btn--' | append: btn_style
+  if class != blank
+    assign classes = classes | append: ' ' | append: class
+  endif
+-%}
+{%- if url != blank -%}
+  <a href="{{ url }}" class="{{ classes }}" {{ attributes }}>
+    <span class="gg-btn__label">{{ label | escape }}</span>
+    {%- render 'gg-icon', icon: 'arrow', class: 'gg-btn__arrow' -%}
+  </a>
+{%- else -%}
+  <button type="{{ type | default: 'button' }}" class="{{ classes }}" {{ attributes }}>
+    <span class="gg-btn__label">{{ label | escape }}</span>
+    {%- render 'gg-icon', icon: 'arrow', class: 'gg-btn__arrow' -%}
+  </button>
+{%- endif -%}

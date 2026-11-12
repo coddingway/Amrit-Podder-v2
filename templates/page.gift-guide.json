@@ -1,0 +1,66 @@
+{
+  "layout": "gift-guide",
+  "sections": {
+    "banner": {
+      "type": "gift-guide-banner",
+      "settings": {
+        "logo_text": "TISSO VISON",
+        "tagline": "Find the ideal gift for your loved ones.",
+        "choose_label": "Choose gift",
+        "choose_url": "/collections/all",
+        "heading": "The Gift Guide",
+        "description": "Discover Joy: Your Ultimate Holiday Gift Destination. Explore our curated selection and find the perfect gifts to delight your loved ones this holiday season.",
+        "description_mobile": "Discover Joy: Your Ultimate Holiday Gift Destination.",
+        "shop_label": "Shop now",
+        "shop_url": "/collections/all",
+        "strip_text": "SUSTAINABLE, ETHICALLY MADE CLOTHES IN SIZES XXS TO 6XL",
+        "strip_text_mobile": "SUSTAINABLE, ETHICALLY MADE ACTIVEWEAR"
+      }
+    },
+    "grid": {
+      "type": "gift-guide-grid",
+      "blocks": {
+        "product_bag": {
+          "type": "product",
+          "settings": { "product": "black-leather-bag", "hotspot_x": 59, "hotspot_y": 54 }
+        },
+        "product_tuxedo": {
+          "type": "product",
+          "settings": { "product": "blue-silk-tuxedo", "hotspot_x": 82, "hotspot_y": 50 }
+        },
+        "product_shirt": {
+          "type": "product",
+          "settings": { "product": "chequered-red-shirt", "hotspot_x": 60, "hotspot_y": 18 }
+        },
+        "product_jacket": {
+          "type": "product",
+          "settings": { "product": "classic-leather-jacket", "hotspot_x": 70, "hotspot_y": 16 }
+        },
+        "product_varsity": {
+          "type": "product",
+          "settings": { "product": "classic-varsity-top", "hotspot_x": 49, "hotspot_y": 23 }
+        },
+        "product_denim": {
+          "type": "product",
+          "settings": { "product": "dark-denim-top", "hotspot_x": 74, "hotspot_y": 37 }
+        }
+      },
+      "block_order": [
+        "product_bag",
+        "product_tuxedo",
+        "product_shirt",
+        "product_jacket",
+        "product_varsity",
+        "product_denim"
+      ],
+      "settings": {
+        "title": "Tisso vison in the wild",
+        "add_to_cart_label": "Add to cart",
+        "auto_add_product": "dark-winter-jacket",
+        "trigger_color": "Black",
+        "trigger_sizes": "M, Medium"
+      }
+    }
+  },
+  "order": ["banner", "grid"]
+}
