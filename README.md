@@ -1,99 +1,338 @@
-# Dawn
+# Gift Guide — Shopify Theme Development Task
 
-[![Build status](https://github.com/shopify/dawn/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Shopify/dawn/actions/workflows/ci.yml?query=branch%3Amain)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?color=informational)](/.github/CONTRIBUTING.md)
+Implementation of a Figma design as a standalone **"Gift Guide"** page on a Shopify store running the **Dawn** theme (v16.1.1).
+The page is built from **two new, from-scratch sections** (Banner + Grid) and a **quick-view popup** with a working **Add to cart**.
 
-[Getting started](#getting-started) |
-[Staying up to date with Dawn changes](#staying-up-to-date-with-dawn-changes) |
-[Developer tools](#developer-tools) |
-[Contributing](#contributing) |
-[Code of conduct](#code-of-conduct) |
-[Theme Store submission](#theme-store-submission) |
-[License](#license)
+- **Live page:** https://amrit-podder-48-teststore.myshopify.com/pages/gift-guide *(store is password-protected)*
+- **Design:** Figma — desktop (1440px) and mobile (375px) frames, popup and component states
+- **Pull request:** `development` → `master`
 
-Dawn represents a HTML-first, JavaScript-only-as-needed approach to theme development. It's Shopify's first source available theme with performance, flexibility, and [Online Store 2.0 features](https://www.shopify.com/partners/blog/shopify-online-store) built-in and acts as a reference for building Shopify themes.
+---
 
-* **Web-native in its purest form:** Themes run on the [evergreen web](https://www.w3.org/2001/tag/doc/evergreen-web/). We leverage the latest web browsers to their fullest, while maintaining support for the older ones through progressive enhancement—not polyfills.
-* **Lean, fast, and reliable:** Functionality and design defaults to “no” until it meets this requirement. Code ships on quality. Themes must be built with purpose. They shouldn’t support each and every feature in Shopify.
-* **Server-rendered:** HTML must be rendered by Shopify servers using Liquid. Business logic and platform primitives such as translations and money formatting don’t belong on the client. Async and on-demand rendering of parts of the page is OK, but we do it sparingly as a progressive enhancement.
-* **Functional, not pixel-perfect:** The Web doesn’t require each page to be rendered pixel-perfect by each browser engine. Using semantic markup, progressive enhancement, and clever design, we ensure that themes remain functional regardless of the browser.
+## Table of contents
 
-You can find a more detailed version of our theme code principles in the [contribution guide](https://github.com/Shopify/dawn/blob/main/.github/CONTRIBUTING.md#theme-code-principles).
+1. [The task](#1-the-task)
+2. [Requirements checklist](#2-requirements-checklist)
+3. [Tech stack](#3-tech-stack)
+4. [Architecture](#4-architecture)
+5. [Banner section](#5-banner-section)
+6. [Grid section](#6-grid-section)
+7. [Quick-view popup (JavaScript)](#7-quick-view-popup-javascript)
+8. [Add to cart & auto-add rule](#8-add-to-cart--auto-add-rule)
+9. [Styling & responsive behaviour](#9-styling--responsive-behaviour)
+10. [Accessibility](#10-accessibility)
+11. [Performance](#11-performance)
+12. [Store configuration](#12-store-configuration)
+13. [Setup & deployment](#13-setup--deployment)
+14. [Testing](#14-testing)
+15. [Git workflow](#15-git-workflow)
 
-## Getting started
-We recommend using Dawn as a starting point for theme development. [Learn more on Shopify.dev](https://shopify.dev/themes/getting-started/create).
+---
 
-> If you're building a theme for the Shopify Theme Store, then you can use Dawn as a starting point. However, the theme that you submit needs to be [substantively different from Dawn](https://shopify.dev/themes/store/requirements#uniqueness) so that it provides added value for merchants. Learn about the [ways that you can use Dawn](https://shopify.dev/themes/tools/dawn#ways-to-use-dawn).
+## 1. The task
 
-Please note that the main branch may include code for features not yet released. The "stable" version of Dawn is available in the theme store.
+Build the page from the Figma file **pixel perfect**, as a **separate page** in the store, split into **two Shopify sections**:
 
-## Staying up to date with Dawn changes
+| Part | Brief |
+|---|---|
+| **Banner** | Top bar, hero and bottom strip. All texts marked in the design must be **editable from the theme customizer**. **Buttons must be animated.** |
+| **Grid** | **Six blocks**, one product each; products must be **selectable from the customizer**. Each image has a "+" hotspot. |
+| **Popup** | Opens from a hotspot. Shows the product **name, price, description and variants**. Variants must be **rendered dynamically from product data**. **ADD TO CART** must add the product to the cart. |
+| **Special rule** | When a product with the variant options **Black** and **Medium** is added to the cart, **"Soft Winter Jacket"** must be added automatically. |
+| **Mobile** | Dedicated mobile layout from the Figma mobile frame. |
 
-Say you're building a new theme off Dawn but you still want to be able to pull in the latest changes, you can add a remote `upstream` pointing to this Dawn repository.
+**Constraints**
 
-1. Navigate to your local theme folder.
-2. Verify the list of remotes and validate that you have both an `origin` and `upstream`:
-```sh
-git remote -v
+- **No ready-made Dawn sections or components** — both sections are written from scratch.
+- **Vanilla JavaScript only** — no jQuery.
+- Code is evaluated on **structure, comments and efficiency**.
+
+---
+
+## 2. Requirements checklist
+
+| Requirement | Status | Where |
+|---|---|---|
+| Separate page | ✅ | `templates/page.gift-guide.json` assigned to the *Gift Guide* page |
+| Two new sections, no Dawn reuse | ✅ | `sections/gift-guide-banner.liquid`, `sections/gift-guide-grid.liquid` |
+| Banner texts editable in customizer | ✅ | 11 text/url settings (logo, tagline, buttons, heading, copy, strip + mobile variants) |
+| Animated buttons | ✅ | `snippets/gg-button.liquid` + `assets/gg-button.css` |
+| Six products selectable in customizer | ✅ | `product` blocks, `max_blocks: 6` |
+| Popup: name, price, description, variants | ✅ | `assets/gg-grid.js` |
+| Variants rendered dynamically | ✅ | Built from per-product JSON (`snippets/gg-product-data.liquid`) |
+| Functional Add to cart | ✅ | AJAX Cart API `POST /cart/add.js` |
+| Black + Medium → add Soft Winter Jacket | ✅ | `shouldAutoAdd()` in `assets/gg-grid.js`, configurable in section settings |
+| Mobile view | ✅ | `@media (max-width: 749px)` layouts in section CSS |
+| Vanilla JS, no jQuery | ✅ | One ES2020 custom element |
+
+---
+
+## 3. Tech stack
+
+| Layer | Technology |
+|---|---|
+| Platform | Shopify **Online Store 2.0** (JSON templates, sections, blocks, theme editor) |
+| Base theme | Dawn v16.1.1 (used only as the host theme — nothing reused on this page) |
+| Templating | **Liquid** — `{% render %}` snippets with LiquidDoc headers, `image_url` / `image_tag`, `money`, `placeholder_svg_tag`, `preload_tag` |
+| JavaScript | **Vanilla JS (ES2020)** — Custom Elements, native `<dialog>`, `fetch`, event delegation |
+| Styling | Plain **CSS** — custom properties, CSS Grid/Flexbox, `:where()`, `aspect-ratio`, `prefers-reduced-motion` |
+| Cart | Shopify **AJAX Cart API** (`/cart/add.js`) |
+| Fonts | **Jost** (300–500, variable) and **Lustria** (400), self-hosted `woff2` |
+| Tooling | Shopify CLI (`theme check`, `theme push`, `theme publish`), GitHub integration for deployment |
+
+---
+
+## 4. Architecture
+
 ```
-3. If you don't see an `upstream`, you can add one that points to Shopify's Dawn repository:
-```sh
-git remote add upstream https://github.com/Shopify/dawn.git
+layout/
+  gift-guide.liquid            Standalone layout (no Dawn header/footer/base.css/global.js)
+templates/
+  page.gift-guide.json         Page template: banner + grid
+sections/
+  gift-guide-banner.liquid     Section 1 — Banner
+  gift-guide-grid.liquid       Section 2 — Grid + <dialog> popup
+snippets/
+  gg-button.liquid             Animated button (renders <a> or <button>)
+  gg-icon.liquid               Inline SVG icons from Figma (currentColor)
+  gg-product-data.liquid       Compact product JSON for the popup
+assets/
+  gg-button.css                Button + hover animation
+  gg-banner.css                Banner styles
+  gg-grid.css                  Grid + popup styles
+  gg-grid.js                   <gg-product-grid> custom element
+  gg-hero-top.svg              Desktop illustration (upper)
+  gg-hero-bottom.svg           Desktop illustration (lower)
+  gg-hero-mobile.svg           Mobile illustration
+  gg-jost.woff2, gg-lustria.woff2
 ```
-4. Pull in the latest Dawn changes into your repository:
-```sh
-git fetch upstream
-git pull upstream main
+
+**Request flow**
+
+```
+/pages/gift-guide
+  └─ template page.gift-guide.json  ("layout": "gift-guide")
+       ├─ gift-guide-banner   → static HTML from settings (no JS)
+       └─ gift-guide-grid     → 6 tiles + embedded product JSON + <dialog>
+                                  └─ gg-grid.js: hotspot click → render popup → /cart/add.js
 ```
 
-## Developer tools
+**Conventions**
 
-There are a number of really useful tools that the Shopify Themes team uses during development. Dawn is already set up to work with these tools.
+- All CSS classes are prefixed with **`gg-`** (BEM-style: `gg-banner__heading`, `gg-btn--dark`) so nothing collides with Dawn.
+- Sections are restricted to page templates via `"enabled_on": { "templates": ["page"] }` and ship with presets, so they can also be added from the theme editor.
+- Each section loads only its own stylesheet/script.
 
-### Shopify CLI
+---
 
-[Shopify CLI](https://github.com/Shopify/shopify-cli) helps you build Shopify themes faster and is used to automate and enhance your local development workflow. It comes bundled with a suite of commands for developing Shopify themes—everything from working with themes on a Shopify store (e.g. creating, publishing, deleting themes) or launching a development server for local theme development.
+## 5. Banner section
 
-You can follow this [quick start guide for theme developers](https://shopify.dev/docs/themes/tools/cli) to get started.
+`sections/gift-guide-banner.liquid`
 
-### Theme Check
+**Customizer settings**
 
-We recommend using [Theme Check](https://github.com/shopify/theme-check) as a way to validate and lint your Shopify themes.
+| Setting | Default |
+|---|---|
+| Logo text | `TISSO VISON` |
+| Tagline | `Find the ideal gift for your loved ones.` |
+| Top button label / link | `Choose gift` / `/collections/all` |
+| Heading | `The Gift Guide` |
+| Description / Description (mobile) | Long copy / shorter mobile copy |
+| Hero button label / link | `Shop now` / `/collections/all` |
+| Strip text / Strip text (mobile) | `SUSTAINABLE, ETHICALLY MADE CLOTHES IN SIZES XXS TO 6XL` / `… ACTIVEWEAR` |
 
-We've added Theme Check to Dawn's [list of VS Code extensions](/.vscode/extensions.json) so if you're using Visual Studio Code as your code editor of choice, you'll be prompted to install the [Theme Check VS Code](https://marketplace.visualstudio.com/items?itemName=Shopify.theme-check-vscode) extension upon opening VS Code after you've forked and cloned Dawn.
+**Implementation notes**
 
-You can also run it from a terminal with the following Shopify CLI command:
+- **Desktop:** 3-column grid top bar (logo · tagline · button), 780px hero with two SVG illustrations positioned from the Figma coordinates, bottom strip.
+- **Mobile:** the top bar becomes a hamburger header; the menu is a native **`<details>`/`<summary>`** disclosure, so it works with **zero JavaScript**. The hero switches to a centred layout with a dedicated mobile illustration.
+- **Button animation** (`gg-button.css`): a `::before` layer scales on the X axis from the left (`transform: scaleX()`), the label colour cross-fades and the arrow slides 5px. Dark buttons fill with yellow (`#FFF544`); yellow buttons drain to black. Disabled for `prefers-reduced-motion`.
+
+---
+
+## 6. Grid section
+
+`sections/gift-guide-grid.liquid`
+
+**Section settings**
+
+| Setting | Purpose |
+|---|---|
+| Title | `Tisso vison in the wild` |
+| Popup button label | `Add to cart` |
+| Product to add automatically | Defaults to **Soft Winter Jacket** |
+| Trigger colour | `Black` |
+| Trigger size(s) | `M, Medium` (comma-separated) |
+
+**Block settings (×6, `max_blocks: 6`)**
+
+| Setting | Purpose |
+|---|---|
+| Product | Product picker |
+| Hotspot horizontal / vertical position | Places the "+" button on the image (desktop), as in Figma |
+
+**Implementation notes**
+
+- Images use `image_url` + `image_tag` with a responsive `srcset`/`sizes` and `loading="lazy"`.
+- Hotspot coordinates are passed as CSS custom properties (`--gg-hotspot-x / -y`) — no inline positioning logic in JS.
+- Each tile embeds its product data as `<script type="application/json">`, rendered by `snippets/gg-product-data.liquid`. Only what the popup needs is output (title, formatted price, trimmed description, image, options, swatches, variants) — much lighter than `{{ product | json }}`.
+- Prices are formatted **server-side** with the `money` filter, so the store's money format (`980,00€`) is respected without client-side formatting.
+
+---
+
+## 7. Quick-view popup (JavaScript)
+
+`assets/gg-grid.js` — a single custom element, **`<gg-product-grid>`**.
+
+**Why a custom element?** It initialises itself in `connectedCallback`, so it works on page load *and* when the theme editor re-renders the section — no `shopify:section:load` wiring needed.
+
+**Flow**
+
+1. **Event delegation** — one `click` listener on the section handles hotspots, close button and backdrop, regardless of block count.
+2. **`open(product)`** fills the popup from the embedded JSON and calls `dialog.showModal()`.
+3. **Options are rendered by name, in Figma order** (colour first):
+   - `Color` / `Colour` → **radio-group buttons** (`role="radiogroup"` / `role="radio"`, `aria-checked`) with a 5.8px swatch bar. The active value is **filled black across the whole button, swatch bar included**; switching **slides** that fill to the new value while the labels cross-fade, and the very first pick fades in place — matching the Figma prototype's Smart Animate (**300ms, ease-out**). Position is driven by CSS custom properties (`--gg-selected`, `--gg-count`), so it works for any number of values.
+   - Any other option (e.g. `Size`) → **custom dropdown** (`button` + `role="listbox"`), keyboard operable (↑ ↓ Enter Space Esc Tab).
+   - Options with a single value are pre-selected.
+4. **`currentVariant()`** matches the selected values against `variant.options`; **`updateVariant()`** syncs price and sold-out state.
+5. **Swatch colour resolution** (`swatchColor()`):
+   1. Shopify **native swatch** colour on the option value (if set in admin)
+   2. **Figma palette** — Blue `#0D499F`, Red `#B20F36`, Grey `#AFAFB7`, Black, White
+   3. Value as a **CSS colour name** (validated with `CSS.supports`)
+   4. Neutral fallback `#C4C4C4`
+6. **Closing** — ✕ button, backdrop click, or Esc (Esc closes an open dropdown first). Focus returns to the hotspot that opened the popup.
+
+Variant data is never hard-coded — every name, value, price and availability comes from the product.
+
+---
+
+## 8. Add to cart & auto-add rule
+
+```js
+POST {{ routes.cart_add_url }}.js
+Content-Type: application/json
+
+{ "items": [
+    { "id": <selected variant>, "quantity": 1 },
+    { "id": <Soft Winter Jacket variant>, "quantity": 1 }   // only when the rule matches
+] }
+```
+
+- **Validation:** all options must be chosen ("Please choose your size."), and the variant must be available.
+- **Auto-add rule** — `shouldAutoAdd(variant)`:
+  - the variant's options include the **trigger colour** (`Black`) **and** one of the **trigger sizes** (`M`, `Medium`);
+  - comparison is case-insensitive;
+  - the extra item is sent **in the same request** (one round trip, atomic);
+  - the auto-add variant is the selected/first available variant of the configured product, output by Liquid as `data-auto-add-variant`.
+- **Feedback:** live region message ("Added to cart. View cart"), errors from the Cart API are surfaced, the button is disabled with `aria-busy` while the request is in flight.
+- A `gg:cart-updated` event is dispatched on `document` so other components could react.
+
+---
+
+## 9. Styling & responsive behaviour
+
+| Breakpoint | Behaviour |
+|---|---|
+| **≥ 1100px** | Desktop layout from the 1440px frame; content capped at 1440px and centred |
+| **750–1099px** | Desktop composition with tighter top bar |
+| **< 750px** | Mobile frame: hamburger header, centred hero, 2-column grid (4px gap), fixed hotspot position |
+
+**Design tokens from Figma**
+
+| Token | Value |
+|---|---|
+| Yellow | `#FFF544` |
+| Grey bars | `#F5F5F5` (mobile header `#F7F7F7`, menu panel `#F2F2F2`) |
+| Labels | `#333333` |
+| Heading | Jost Medium 70px / 30px mobile |
+| Body | Jost Regular 16–20px |
+| Popup name / description | Jost Light 16px / 14px |
+| Grid title, prices | Lustria Regular 36px / 24px mobile, 16px |
+| Grid tile | 433 × 444 (desktop), 169 × 186 (mobile) |
+| Popup | 319 × 455 |
+
+Base button rules use **`:where(.gg-btn)`** (zero specificity) so section-level modifiers always win regardless of stylesheet load order — no `!important` anywhere.
+
+---
+
+## 10. Accessibility
+
+- Native `<dialog>` with `aria-labelledby`, focus trap and Esc handling from the browser.
+- Hotspots are real `<button>`s with `aria-label="Quick view: <product>"` and `aria-haspopup="dialog"`.
+- Colour options use `radiogroup`/`radio` semantics; the size dropdown uses `listbox`/`option` with `aria-expanded` and `aria-selected`.
+- Status/error messages use `role="status"` + `aria-live="polite"`.
+- Visible `:focus-visible` outlines; decorative SVGs are `aria-hidden`.
+- Animations respect `prefers-reduced-motion`.
+
+---
+
+## 11. Performance
+
+- **No dependencies**, one small JS file loaded with `defer`, only on this page.
+- **Self-hosted fonts** (Jost variable font covers 300–500 in one file) with `preload` and `font-display: swap`.
+- Lean custom layout: Dawn's `base.css`, `global.js`, header and footer are **not** loaded.
+- Responsive, lazy-loaded product images; illustrations are SVG.
+- Product JSON is trimmed to the fields the popup needs.
+
+---
+
+## 12. Store configuration
+
+| Setting | Value |
+|---|---|
+| Store currency | **EUR** |
+| Money format | `{{amount_with_comma_separator}}€` → `980,00€` (as in Figma) |
+| Theme setting | `currency_code_enabled: false` (no "EUR" suffix) |
+| Page | *Gift Guide* → template `gift-guide` |
+| Grid products | Black Leather Bag, Blue Silk Tuxedo, Chequered Red Shirt, Classic Leather Jacket, Classic Varsity Top, Dark Denim Top |
+| Colour variants (per Figma) | White/Black, Blue/Black, Red/Grey, White/Black, Grey/Black, Blue/Black |
+| Auto-add product | Soft Winter Jacket (`dark-winter-jacket`) |
+
+---
+
+## 13. Setup & deployment
+
+1. **Connect the repo** — Online Store → Themes → Import → **Connect from GitHub** → select the branch → **Publish**.
+2. **Create the page** — Online Store → Pages → *Add page* (e.g. "Gift Guide") → **Template: `gift-guide`** → Save.
+3. **Configure** — in the theme customizer, pick the six products in *Gift Guide grid* and, if needed, the auto-add product and trigger values.
+
+**Local development**
+
+```bash
+shopify theme dev --store <store>.myshopify.com
+```
 
 ```bash
 shopify theme check
 ```
 
-### Continuous Integration
+---
 
-Dawn uses [GitHub Actions](https://github.com/features/actions) to maintain the quality of the theme. [This is a starting point](https://github.com/Shopify/dawn/blob/main/.github/workflows/ci.yml) and what we suggest to use in order to ensure you're building better themes. Feel free to build off of it!
+## 14. Testing
 
-#### Shopify/lighthouse-ci-action
+| Scenario | Expected | Result |
+|---|---|---|
+| Desktop layout vs Figma 1440 frame | Positions/sizes match (hero text at y 425/545/679, tiles 433×444, hotspots per design) | ✅ |
+| Mobile layout vs Figma 375 frame | Hamburger, centred hero, 2-column grid | ✅ |
+| Hamburger menu | Opens/closes panel with tagline + CHOOSE GIFT | ✅ |
+| Popup content (×6) | Name, price, description, colour swatches, sizes from product data | ✅ |
+| Swatch colours | Bars match Figma hex values | ✅ |
+| Add Black / M | Cart = product **+ Soft Winter Jacket** | ✅ |
+| Add non-matching variant (e.g. White / S) | Cart = product only | ✅ |
+| Missing option | Message "Please choose your size." | ✅ |
+| Close popup | ✕, backdrop, Esc | ✅ |
+| `shopify theme check` | No offenses in the new files | ✅ |
 
-We love fast websites! Which is why we created [Shopify/lighthouse-ci-action](https://github.com/Shopify/lighthouse-ci-action). This runs a series of [Google Lighthouse](https://developers.google.com/web/tools/lighthouse) audits for the home, product and collections pages on a store to ensure code that gets added doesn't degrade storefront performance over time.
+---
 
-#### Shopify/theme-check-action
+## 15. Git workflow
 
-Dawn runs [Theme Check](#Theme-Check) on every commit via [Shopify/theme-check-action](https://github.com/Shopify/theme-check-action).
+| Branch | Content |
+|---|---|
+| `master` | Clean Dawn v16.1.1, connected to the store via the GitHub integration |
+| `development` | Gift Guide implementation — connected and published as the live theme |
 
-## Contributing
+Work is submitted as a **pull request from `development` into `master`**.
 
-Want to make commerce better for everyone by contributing to Dawn? We'd love your help! Please read our [contributing guide](https://github.com/Shopify/dawn/blob/main/.github/CONTRIBUTING.md) to learn about our development process, how to propose bug fixes and improvements, and how to build for Dawn.
+---
 
-## Code of conduct
-
-All developers who wish to contribute through code or issues, please first read our [Code of Conduct](https://github.com/Shopify/dawn/blob/main/.github/CODE_OF_CONDUCT.md).
-
-## Theme Store submission
-
-The [Shopify Theme Store](https://themes.shopify.com/) is the place where Shopify merchants find the themes that they'll use to showcase and support their business. As a theme partner, you can create themes for the Shopify Theme Store and reach an international audience of an ever-growing number of entrepreneurs.
-
-Ensure that you follow the list of [theme store requirements](https://shopify.dev/themes/store/requirements) if you're interested in becoming a [Shopify Theme Partner](https://themes.shopify.com/services/themes/guidelines) and building themes for the Shopify platform.
-
-## License
-
-Copyright (c) 2021-present Shopify Inc. See [LICENSE](/LICENSE.md) for further details.
+Base theme: [Dawn](https://github.com/Shopify/dawn) by Shopify — see `LICENSE.md`. Fonts Jost and Lustria are licensed under the SIL Open Font License.
