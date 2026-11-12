@@ -1,0 +1,212 @@
+{%- comment -%}
+  Gift Guide — Product grid + quick-view popup (custom section, built from scratch)
+  ------------------------------------------------------------------
+  - Up to six "product" blocks; each product is picked in the customizer.
+  - Each block has a "+" hotspot whose position is adjustable (desktop).
+  - The hotspot opens a native <dialog> popup rendered by assets/gg-grid.js
+    from the product JSON embedded below (name, price, description, variants).
+  - "Add to cart" uses the AJAX Cart API. When the added variant matches the
+    trigger options (default: Black + M/Medium) the "auto-add" product is
+    added in the same request.
+{%- endcomment -%}
+{{ 'gg-fonts.css' | asset_url | stylesheet_tag }}
+{{ 'gg-button.css' | asset_url | stylesheet_tag }}
+{{ 'gg-grid.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'gg-grid.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid
+  assign s = section.settings
+  assign auto_add_variant = s.auto_add_product.selected_or_first_available_variant
+-%}
+
+<gg-product-grid
+  class="gg-grid"
+  data-cart-add-url="{{ routes.cart_add_url }}.js"
+  data-cart-url="{{ routes.cart_url }}"
+  {% if auto_add_variant %}
+    data-auto-add-variant="{{ auto_add_variant.id }}"
+  {% endif %}
+  data-trigger-color="{{ s.trigger_color | escape }}"
+  data-trigger-sizes="{{ s.trigger_sizes | escape }}"
+>
+  <div class="gg-grid__inner">
+    {%- if s.title != blank -%}
+      <h2 class="gg-grid__title">{{ s.title | escape }}</h2>
+    {%- endif -%}
+
+    <ul class="gg-grid__list" role="list">
+      {%- for block in section.blocks -%}
+        {%- assign product = block.settings.product -%}
+        <li
+          class="gg-grid__item"
+          style="--gg-hotspot-x: {{ block.settings.hotspot_x }}%; --gg-hotspot-y: {{ block.settings.hotspot_y }}%;"
+          {{ block.shopify_attributes }}
+        >
+          {%- if product != blank -%}
+            {%- if product.featured_image -%}
+              {{
+                product.featured_image
+                | image_url: width: 1000
+                | image_tag:
+                  widths: '340, 433, 680, 866, 1000',
+                  sizes: '(min-width: 1400px) 433px, (min-width: 750px) calc((100vw - 100px) / 3), calc((100vw - 36px) / 2)',
+                  loading: 'lazy',
+                  class: 'gg-grid__image',
+                  alt: product.featured_image.alt | default: product.title
+              }}
+            {%- else -%}
+              {{ 'product-apparel-1' | placeholder_svg_tag: 'gg-grid__image gg-grid__image--placeholder' }}
+            {%- endif -%}
+
+            <button
+              type="button"
+              class="gg-grid__hotspot"
+              aria-haspopup="dialog"
+              aria-label="Quick view: {{ product.title | escape }}"
+              data-gg-open
+            >
+              {%- render 'gg-icon', icon: 'plus' -%}
+            </button>
+
+            <script type="application/json" data-gg-product>
+              {% render 'gg-product-data', product: product %}
+            </script>
+          {%- else -%}
+            {{ 'product-apparel-1' | placeholder_svg_tag: 'gg-grid__image gg-grid__image--placeholder' }}
+          {%- endif -%}
+        </li>
+      {%- endfor -%}
+    </ul>
+  </div>
+
+  {%- comment -%} Quick-view popup. Content is rendered by gg-grid.js on open. {%- endcomment -%}
+  <dialog class="gg-popup" aria-labelledby="GiftGuidePopupTitle-{{ section.id }}">
+    <button type="button" class="gg-popup__close" aria-label="Close" data-gg-close>
+      {%- render 'gg-icon', icon: 'close' -%}
+    </button>
+
+    {%- comment -%} Icon markup reused by the JS-rendered size dropdown. {%- endcomment -%}
+    <template data-gg-chevron>{%- render 'gg-icon', icon: 'chevron' -%}</template>
+
+    <form class="gg-popup__form" method="post" action="{{ routes.cart_add_url }}" novalidate>
+      <div class="gg-popup__summary">
+        <img class="gg-popup__image" alt="" width="123" height="142" data-gg-image hidden>
+        <div class="gg-popup__info">
+          <h3 class="gg-popup__title" id="GiftGuidePopupTitle-{{ section.id }}" data-gg-title></h3>
+          <p class="gg-popup__price" data-gg-price></p>
+          <p class="gg-popup__description" data-gg-description></p>
+        </div>
+      </div>
+
+      {%- comment -%} Option pickers (colour buttons / size dropdown) are injected here. {%- endcomment -%}
+      <div class="gg-popup__options" data-gg-options></div>
+
+      <p class="gg-popup__message" role="status" aria-live="polite" data-gg-message></p>
+
+      {%- render 'gg-button',
+        label: s.add_to_cart_label,
+        type: 'submit',
+        style: 'dark',
+        class: 'gg-popup__submit',
+        attributes: 'data-gg-submit'
+      -%}
+    </form>
+  </dialog>
+</gg-product-grid>
+
+{% schema %}
+{
+  "name": "Gift Guide grid",
+  "tag": "section",
+  "class": "gg-grid-section",
+  "limit": 1,
+  "max_blocks": 6,
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Tisso vison in the wild"
+    },
+    {
+      "type": "text",
+      "id": "add_to_cart_label",
+      "label": "Popup button label",
+      "default": "Add to cart"
+    },
+    {
+      "type": "header",
+      "content": "Automatic add-on",
+      "info": "When a variant with both trigger options is added to the cart, this product is added too."
+    },
+    {
+      "type": "product",
+      "id": "auto_add_product",
+      "label": "Product to add automatically"
+    },
+    {
+      "type": "text",
+      "id": "trigger_color",
+      "label": "Trigger colour",
+      "default": "Black"
+    },
+    {
+      "type": "text",
+      "id": "trigger_sizes",
+      "label": "Trigger size(s)",
+      "info": "Comma separated, e.g. \"M, Medium\".",
+      "default": "M, Medium"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "product",
+      "name": "Product",
+      "settings": [
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Product"
+        },
+        {
+          "type": "range",
+          "id": "hotspot_x",
+          "label": "Hotspot horizontal position",
+          "min": 0,
+          "max": 94,
+          "step": 1,
+          "unit": "%",
+          "default": 60,
+          "info": "Desktop only. On mobile the hotspot sits at the top of the image."
+        },
+        {
+          "type": "range",
+          "id": "hotspot_y",
+          "label": "Hotspot vertical position",
+          "min": 0,
+          "max": 94,
+          "step": 1,
+          "unit": "%",
+          "default": 50
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Gift Guide grid",
+      "blocks": [
+        { "type": "product" },
+        { "type": "product" },
+        { "type": "product" },
+        { "type": "product" },
+        { "type": "product" },
+        { "type": "product" }
+      ]
+    }
+  ],
+  "enabled_on": {
+    "templates": ["page"]
+  }
+}
+{% endschema %}

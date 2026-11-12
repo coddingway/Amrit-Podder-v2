@@ -1,0 +1,291 @@
+/* ==========================================================================
+   Gift Guide — Banner section (sections/gift-guide-banner.liquid)
+   Desktop values follow the 1440px Figma frame; mobile follows the 375px frame.
+   ========================================================================== */
+.gg-banner {
+  --gg-grey: #f5f5f5;
+  --gg-yellow: #fff544;
+
+  /* Self-contained typography: also correct inside Dawn's layout (homepage). */
+  color: #000;
+  font-family: 'Jost', sans-serif;
+  letter-spacing: normal;
+  line-height: normal;
+}
+
+:where(.gg-banner) p {
+  margin: 0;
+}
+
+/* Desktop / mobile visibility helpers (scoped to the banner). */
+.gg-banner__mobile,
+.gg-banner__menu {
+  display: none;
+}
+
+/* --------------------------------------------------------------------------
+   Top bar
+   -------------------------------------------------------------------------- */
+.gg-banner__bar {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  /* Content aligns with the 1440px hero on wider screens. */
+  padding: 10px max(50px, calc((100% - 1340px) / 2));
+  background: var(--gg-grey);
+}
+
+.gg-banner__logo {
+  justify-self: start;
+  color: #000;
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 19px; /* cap height of the Figma logo */
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.gg-banner__tagline {
+  font-size: 16px;
+  line-height: 13.424px;
+  text-align: center;
+}
+
+.gg-banner__choose {
+  --gg-btn-pad-left: 41px;
+  --gg-btn-pad-right: 23px;
+  justify-self: end;
+  width: 207px;
+  min-height: 44px;
+}
+
+/* --------------------------------------------------------------------------
+   Hero
+   -------------------------------------------------------------------------- */
+.gg-banner__hero {
+  overflow: hidden;
+}
+
+.gg-banner__hero-inner {
+  position: relative;
+  max-width: 1440px;
+  height: 780px;
+  margin: 0 auto;
+}
+
+.gg-banner__art img {
+  position: absolute;
+  height: auto;
+  pointer-events: none;
+  user-select: none;
+}
+
+.gg-banner__art-top {
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+/* 890×402 drawing anchored at x:550 y:378 inside the 1440×780 hero. */
+.gg-banner__art-bottom {
+  top: 378px;
+  left: 38.194%;
+  width: 61.806%;
+}
+
+.gg-banner__art-mobile {
+  display: none;
+}
+
+.gg-banner__content {
+  position: absolute;
+  top: 425px;
+  left: 67px;
+  z-index: 1;
+  width: 483px;
+}
+
+.gg-banner__heading {
+  margin: 0;
+  color: inherit;
+  font-family: inherit;
+  letter-spacing: normal;
+  font-size: 70px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.gg-banner__text {
+  height: 84px;
+  margin-top: 50px;
+  font-size: 20px;
+  line-height: 1.4;
+}
+
+.gg-banner__shop {
+  width: 220px;
+  margin-top: 50px;
+}
+
+/* --------------------------------------------------------------------------
+   Bottom strip
+   -------------------------------------------------------------------------- */
+.gg-banner__strip {
+  padding: 10px 50px;
+  background: var(--gg-grey);
+  font-size: 16px;
+  line-height: 13.424px;
+  text-align: center;
+}
+
+/* --------------------------------------------------------------------------
+   Tablet: keep the desktop composition, tighten the top bar.
+   -------------------------------------------------------------------------- */
+@media screen and (max-width: 1099px) {
+  .gg-banner__bar {
+    padding-inline: 24px;
+    column-gap: 24px;
+  }
+  .gg-banner__content {
+    left: 40px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Mobile (< 750px) — 375px Figma frame
+   -------------------------------------------------------------------------- */
+@media screen and (max-width: 749px) {
+  .gg-banner__desktop {
+    display: none;
+  }
+  .gg-banner__mobile {
+    display: block;
+  }
+
+  /* Header: hamburger left, logo centred. */
+  .gg-banner__bar {
+    grid-template-columns: 1fr auto 1fr;
+    padding: 23px 16px;
+    background: #f7f7f7;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  }
+
+  .gg-banner__logo {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .gg-banner__menu {
+    display: block;
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .gg-banner__menu-toggle {
+    display: flex;
+    align-items: center;
+    width: 24px;
+    height: 19px;
+    list-style: none;
+    cursor: pointer;
+  }
+  .gg-banner__menu-toggle::-webkit-details-marker {
+    display: none;
+  }
+  .gg-banner__menu-close,
+  .gg-banner__menu[open] .gg-banner__menu-open {
+    display: none;
+  }
+  .gg-banner__menu[open] .gg-banner__menu-close {
+    display: block;
+  }
+
+  /* Drop-down panel under the header (Figma: Component 189, open state). */
+  .gg-banner__menu-panel {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 25px 16px;
+    background: #f2f2f2;
+  }
+
+  .gg-banner__menu-panel .gg-banner__choose {
+    --gg-btn-pad-left: 58px;
+    --gg-btn-pad-right: 27px;
+    width: 244px;
+  }
+
+  /* Hero: centred copy above the illustration. */
+  .gg-banner__hero-inner {
+    height: 421px;
+  }
+
+  .gg-banner__art-top,
+  .gg-banner__art-bottom {
+    display: none;
+  }
+
+  .gg-banner__art-mobile {
+    display: block;
+    top: 157px;
+    left: calc(50% + 15.5px);
+    width: 686px;
+    max-width: none;
+    transform: translateX(-50%);
+  }
+
+  .gg-banner__content {
+    position: static;
+    width: auto;
+    padding: 49px 16px 0;
+    text-align: center;
+  }
+
+  .gg-banner__heading {
+    font-size: 30px;
+  }
+
+  .gg-banner__text {
+    max-width: 340px;
+    height: auto;
+    margin: 24px auto 0;
+    font-size: 16px;
+    line-height: 1.3;
+  }
+
+  /* SHOP NOW sits on top of the illustration. */
+  .gg-banner__shop {
+    --gg-btn-pad-left: 20px;
+    --gg-btn-pad-right: 20px;
+    position: absolute;
+    top: 337px;
+    left: 50%;
+    z-index: 1;
+    width: auto;
+    min-height: 46px;
+    margin: 0;
+    gap: 10px;
+    color: #f5f5f5;
+    transform: translateX(-50%);
+  }
+  .gg-banner__shop .gg-btn__label {
+    width: 119px;
+    text-align: center;
+  }
+  .gg-banner__shop .gg-btn__arrow {
+    width: 24px;
+  }
+
+  .gg-banner__strip {
+    padding: 10px 16px;
+    font-size: 14px;
+  }
+}

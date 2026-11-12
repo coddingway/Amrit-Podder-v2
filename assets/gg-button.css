@@ -1,0 +1,99 @@
+/* ==========================================================================
+   Gift Guide — animated button (snippets/gg-button.liquid)
+   A pseudo-element "fill" sweeps across on hover/focus:
+   - .gg-btn--dark  : black button, yellow fill grows from the left
+   - .gg-btn--light : yellow button, yellow fill drains to the left (reveals black)
+   ========================================================================== */
+/* :where() keeps the base rule at zero specificity so sections can override it. */
+:where(.gg-btn) {
+  --gg-btn-yellow: #fff544;
+  --gg-btn-pad-left: 55px;
+  --gg-btn-pad-right: 22px;
+
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 50px;
+  padding: 0 var(--gg-btn-pad-right) 0 var(--gg-btn-pad-left);
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background: #000;
+  color: #fff;
+  font: 400 16px/20.48px 'Jost', sans-serif;
+  letter-spacing: normal;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.35s ease, filter 0.35s ease;
+}
+
+/* The sweeping fill layer. */
+.gg-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--gg-btn-yellow);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.45s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.gg-btn__arrow {
+  flex: none;
+  transition: transform 0.35s ease;
+}
+
+/* Dark → yellow on hover */
+.gg-btn--dark:hover,
+.gg-btn--dark:focus-visible {
+  color: #000;
+}
+.gg-btn--dark:hover::before,
+.gg-btn--dark:focus-visible::before {
+  transform: scaleX(1);
+}
+
+/* Yellow → dark on hover */
+.gg-btn--light {
+  color: #000;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.2));
+}
+.gg-btn--light::before {
+  transform: scaleX(1);
+}
+.gg-btn--light:hover,
+.gg-btn--light:focus-visible {
+  color: #fff;
+  filter: none;
+}
+.gg-btn--light:hover::before,
+.gg-btn--light:focus-visible::before {
+  transform: scaleX(0);
+}
+
+.gg-btn:hover .gg-btn__arrow,
+.gg-btn:focus-visible .gg-btn__arrow {
+  transform: translateX(5px);
+}
+
+.gg-btn:focus-visible {
+  outline: 2px solid #000;
+  outline-offset: 3px;
+}
+
+.gg-btn[disabled] {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gg-btn,
+  .gg-btn::before,
+  .gg-btn__arrow {
+    transition: none;
+  }
+}

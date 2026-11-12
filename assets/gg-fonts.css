@@ -1,0 +1,21 @@
+/* ==========================================================================
+   Gift Guide — fonts from the Figma file (self-hosted)
+   Loaded by the Gift Guide sections so they render correctly in any layout
+   (the Gift Guide page and the Dawn homepage). Relative URLs resolve to the
+   theme's assets folder on Shopify's CDN.
+   ========================================================================== */
+@font-face {
+  font-family: 'Jost';
+  src: url('gg-jost.woff2') format('woff2');
+  font-weight: 300 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Lustria';
+  src: url('gg-lustria.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
