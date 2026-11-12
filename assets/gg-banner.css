@@ -5,6 +5,12 @@
 .gg-banner {
   --gg-grey: #f5f5f5;
   --gg-yellow: #fff544;
+
+  /* Self-contained typography: also correct inside Dawn's layout (homepage). */
+  color: #000;
+  font-family: 'Jost', sans-serif;
+  letter-spacing: normal;
+  line-height: normal;
 }
 
 :where(.gg-banner) p {
@@ -104,6 +110,9 @@
 
 .gg-banner__heading {
   margin: 0;
+  color: inherit;
+  font-family: inherit;
+  letter-spacing: normal;
   font-size: 70px;
   font-weight: 500;
   line-height: 1;

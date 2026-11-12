@@ -8,6 +8,7 @@
   Mobile (< 750px): the top bar collapses into a hamburger menu built
   on native <details>/<summary> — no JavaScript needed.
 {%- endcomment -%}
+{{ 'gg-fonts.css' | asset_url | stylesheet_tag }}
 {{ 'gg-button.css' | asset_url | stylesheet_tag }}
 {{ 'gg-banner.css' | asset_url | stylesheet_tag }}
 
@@ -173,7 +174,7 @@
     }
   ],
   "enabled_on": {
-    "templates": ["page"]
+    "templates": ["page", "index"]
   }
 }
 {% endschema %}
