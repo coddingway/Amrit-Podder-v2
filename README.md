@@ -146,6 +146,7 @@ assets/
 - **Desktop:** 3-column grid top bar (logo · tagline · button), 780px hero with two SVG illustrations positioned from the Figma coordinates, bottom strip.
 - **Mobile:** the top bar becomes a hamburger header; the menu is a native **`<details>`/`<summary>`** disclosure, so it works with **zero JavaScript**. The hero switches to a centred layout with a dedicated mobile illustration.
 - **Button animation** (`gg-button.css`): a `::before` layer scales on the X axis from the left (`transform: scaleX()`), the label colour cross-fades and the arrow slides 5px. Dark buttons fill with yellow (`#FFF544`); yellow buttons drain to black. Disabled for `prefers-reduced-motion`.
+- **Homepage:** the same banner section is enabled on the `index` template and replaces Dawn's image banner; the store's main menu links to the Gift Guide page. Fonts live in `assets/gg-fonts.css`, so the section renders identically inside Dawn's layout.
 
 ---
 
